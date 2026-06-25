@@ -1,0 +1,54 @@
+============================================================
+RAG Pipeline - Execution Mode: AGENT
+Debug Mode: False
+============================================================
+2026-06-25 00:48:49,870 - INFO - HTTP Request: POST https://integrate.api.nvidia.com/v1/embeddings "HTTP/1.1 200 OK"
+
+==================================================
+AGENT MODE - Multiple queries with conversation
+==================================================
+
+Query 1: Tell me about your latest work experience
+----------------------------------------
+2026-06-25 00:48:51,266 - INFO - HTTP Request: POST https://integrate.api.nvidia.com/v1/chat/completions "HTTP/1.1 200 OK"
+2026-06-25 00:49:14,962 - INFO - HTTP Request: POST https://integrate.api.nvidia.com/v1/embeddings "HTTP/1.1 200 OK"
+2026-06-25 00:50:15,279 - INFO - Retrying request to /chat/completions in 0.416078 seconds
+2026-06-25 00:50:27,481 - INFO - HTTP Request: POST https://integrate.api.nvidia.com/v1/chat/completions "HTTP/1.1 200 OK"
+2026-06-25 00:50:27,882 - INFO - HTTP Request: POST https://integrate.api.nvidia.com/v1/chat/completions "HTTP/1.1 200 OK"
+Response: The latest work experience is as a Backend Developer at Technology Company (Confidential) from 2025 to 2026. The job involved developing and maintaining backend adapters for communication with external APIs, implementing reverse engineering solutions on mobile applications, optimizing remote command reliability, diagnosing and resolving critical incidents, collaborating in agile environments, and implementing unit and integration tests.
+
+Query 2: What technical skills do you have?
+----------------------------------------
+2026-06-25 00:50:33,929 - INFO - HTTP Request: POST https://integrate.api.nvidia.com/v1/chat/completions "HTTP/1.1 200 OK"
+2026-06-25 00:50:43,782 - INFO - HTTP Request: POST https://integrate.api.nvidia.com/v1/embeddings "HTTP/1.1 200 OK"
+2026-06-25 00:51:18,102 - INFO - HTTP Request: POST https://integrate.api.nvidia.com/v1/chat/completions "HTTP/1.1 200 OK"
+2026-06-25 00:51:18,506 - INFO - HTTP Request: POST https://integrate.api.nvidia.com/v1/chat/completions "HTTP/1.1 200 OK"
+Response: The technical skills include:
+
+1. Web frameworks: Vue.js / Nuxt 3 (Advanced, 3 years), Astro (Intermediate, 2 years), React (Intermediate, 2 years), Angular (Intermediate, 3 years)
+2. API frameworks: Node.js / Express (Advanced, 5 years), .Net Core (Intermediate, 2 years), NestJS (Basic, 1 year), FastApi (Basic, 2 years), Flask (Basic, 2 years), Rust / Axum (Basic, 1 year)    
+3. Programming languages: Javascript (Advanced, 5 years), Typescript (Advanced, 5 years), Python (Intermediate, 2 years), C# (Intermediate, 2 years)
+4. Database: PostgreSQL / PL/PgSQL (Advanced, 4 years), MongoDB (Intermediate, 2 years), Redis (Basic, 1 year), MS SQL / Transact-SQL (Basic, 1 year)
+5. Cloud & DevOps: AWS (Lambda, API Gateway, S3, DynamoDB, Cloudwatch), GCP (Cloud Run, APIs), Azure, Docker, Git, Nginx, Backblaze S3, Cloudflare (DNS, R2, Workers), Fly.io, Render, Railway, Vercel, Netlify
+6. Others: External API integration, Webhooks (WhatsApp, Telegram), Reverse engineering for APIs (Charles, mitmproxy, HTTP Toolkit), Blockchain (Ethereum, Polygon, Infura, Remix), AI/ML integration (Rasa, GPT, Claude, Llama)
+
+Query 3: Summarize the professional profile
+----------------------------------------
+2026-06-25 00:51:40,318 - INFO - HTTP Request: POST https://integrate.api.nvidia.com/v1/chat/completions "HTTP/1.1 200 OK"
+2026-06-25 00:51:47,254 - INFO - HTTP Request: POST https://integrate.api.nvidia.com/v1/chat/completions "HTTP/1.1 200 OK"
+2026-06-25 00:51:47,644 - INFO - HTTP Request: POST https://integrate.api.nvidia.com/v1/chat/completions "HTTP/1.1 200 OK"
+Response: The professional profile is a full-stack developer with experience since 2018, skilled in multiple programming languages and frameworks, including Javascript with Angular, React, Vue.js, API's Rest in Node.JS, Python, .Net Core, and querying in PostgreSQL, MSSQL, and MongoDB. They are proficient in version control with Git and Azure DevOps, and experienced in publishing applications on Windows Server with IIS and on Linux with Nginx and Docker.
+
+==================================================
+CHAT EXAMPLE - Continuing conversation
+==================================================
+
+Follow-up: Can you provide more details about the latest experience?
+----------------------------------------
+2026-06-25 00:51:53,541 - INFO - HTTP Request: POST https://integrate.api.nvidia.com/v1/chat/completions "HTTP/1.1 200 OK"
+2026-06-25 00:51:59,818 - INFO - HTTP Request: POST https://integrate.api.nvidia.com/v1/embeddings "HTTP/1.1 200 OK"
+2026-06-25 00:52:08,553 - INFO - HTTP Request: POST https://integrate.api.nvidia.com/v1/chat/completions "HTTP/1.1 200 OK"
+2026-06-25 00:52:08,827 - INFO - HTTP Request: POST https://integrate.api.nvidia.com/v1/chat/completions "HTTP/1.1 429 Too Many Requests"
+2026-06-25 00:52:08,828 - INFO - Retrying request to /chat/completions in 0.477401 seconds
+2026-06-25 00:52:09,778 - INFO - HTTP Request: POST https://integrate.api.nvidia.com/v1/chat/completions "HTTP/1.1 200 OK"
+Response: The latest experience details are from Technology Company (Confidential) where the individual worked as a Backend Developer from 2025 to 2026. As a Backend Developer, the main responsibilities included maintaining and improving adapters for integration with multiple APIs, ensuring remote command reliability, and telemetry data integrity. Key accomplishments include developing and maintaining backend adapters using Node.js, Express, and PostgreSQL, implementing reverse engineering solutions, optimizing remote command reliability, diagnosing and resolving critical incidents, collaborating in agile environments, and implementing unit and integration tests.
