@@ -1,4 +1,6 @@
 import json
+from llama_index.core.indices import VectorStoreIndex
+from llama_index.core.objects import ObjectIndex, SimpleToolNodeMapping
 from llama_index.core.agent.workflow import AgentWorkflow
 from llama_index.core import Settings
 from llama_index.core.llms.llm import ToolSelection
@@ -49,32 +51,32 @@ class AgentManager:
         def _safe_get_tool_calls_from_response(instance, response, error_on_no_tool_call=True, **kwargs):
             if not response or not hasattr(response, 'message') or not response.message:
                 return []
-                
+
             message = response.message
-            
+
             # 1. Attempt to retrieve the tool calls already processed/accumulated by the message
             tool_calls = getattr(message, 'tool_calls', [])
-            
+
             # 2. If they are not there, look for them in the additional arguments (fallback)
             if not tool_calls:
                 tool_calls = message.additional_kwargs.get("tool_calls", [])
-                
+
             if not tool_calls:
                 return []
-            
+
             parsed_tool_calls = []
             for tool_call in tool_calls:
                 # Validate if it is a native LlamaIndex object that has already been processed
                 if isinstance(tool_call, ToolSelection):
                     parsed_tool_calls.append(tool_call)
                     continue
-                    
+
                 if not hasattr(tool_call, 'function') or not tool_call.function:
                     continue
-                    
+
                 name = tool_call.function.name
                 raw_args = tool_call.function.arguments
-                
+
                 tool_kwargs = {}
                 if raw_args:
                     try:
@@ -86,7 +88,7 @@ class AgentManager:
                             tool_kwargs = json.loads(clean_args)
                     except Exception:
                         tool_kwargs = {}
-                        
+
                 parsed_tool_calls.append(
                     ToolSelection(
                         tool_id=getattr(tool_call, 'id', f"call_{name}"),
@@ -94,21 +96,63 @@ class AgentManager:
                         tool_kwargs=tool_kwargs
                     )
                 )
-                
+
             return parsed_tool_calls
 
         # Replace the defective method
         NVIDIA.get_tool_calls_from_response = _safe_get_tool_calls_from_response
         # --- END OF PATCH ---
 
-        self.agent = AgentWorkflow.from_tools_or_functions(
-            self.tools,
-            llm=self.llm,
-            verbose=settings.AGENT_VERBOSE,
-        )
+        if settings.is_multi_mode():
+            tool_mapping = SimpleToolNodeMapping.from_objects(list(self.tools))
+
+            obj_index = ObjectIndex.from_objects(
+                list(self.tools),
+                tool_mapping,
+                index_cls=VectorStoreIndex
+            )
+
+            tool_retriever = obj_index.as_retriever(similarity_top_k=3)
+
+            async def call_relevant_tool(query: str) -> str:
+                top_3_tools = tool_retriever.retrieve(query)
+
+                if not top_3_tools:
+                    return "No relevant sources of information were found for that query."
+
+                results = []
+                for tool in top_3_tools:
+                    try:
+                        engine_response = await tool.query_engine.aquery(query)
+                        results.append(
+                            f"--- Source: {tool.metadata.name} ---\n{str(engine_response)}")
+                    except Exception as e:
+                        results.append(
+                            f"Error querying {tool.metadata.name}: {str(e)}")
+
+                return "\n\n".join(results)
+
+            self.agent = AgentWorkflow.from_tools_or_functions(
+                tools_or_functions=[call_relevant_tool],
+                llm=self.llm,
+                verbose=settings.AGENT_VERBOSE,
+                system_prompt=(
+                    "You are an expert agent. Choose from the available tools to answer. "
+                    "Always use the exact tool names as provided. Do not invent tool names."
+                )
+            )
+            debug_print("Agent created successfully with call_relevent_tool")
+        else:
+            self.agent = AgentWorkflow.from_tools_or_functions(
+                self.tools,
+                llm=self.llm,
+                verbose=settings.AGENT_VERBOSE,
+            )
+            debug_print(
+                f"Agent created successfully with {len(self.tools)} tools")
+
         self.ctx = Context(self.agent)
 
-        debug_print(f"Agent created successfully with {len(self.tools)} tools")
         debug_print(f"Max steps: {settings.AGENT_MAX_STEPS}")
         debug_print(f"Verbose: {settings.AGENT_VERBOSE}")
 

@@ -1,9 +1,10 @@
 from config.settings import settings
+from pathlib import Path
 from core.data_loader import DataLoader
 from core.index_manager import IndexManager
 from core.query_engine import QueryEngineManager
 from core.agent_manager import AgentManager
-from utils.debug import debug_print, debug_section, debug_info
+from utils.debug import debug_print, debug_section
 
 
 class RAGOrchestrator:
@@ -25,7 +26,7 @@ class RAGOrchestrator:
         self.nodes = None
         self.summary_index = None
         self.vector_index = None
-        self.tools = None
+        self.tools = ()
         self.query_manager = None
         self.agent_manager = None
 
@@ -40,22 +41,48 @@ class RAGOrchestrator:
 
         # 1. Load data
         debug_print("Step 1: Loading data...")
-        data_loader = DataLoader(self.data_dir)
-        self.nodes = await data_loader.get_nodes()
 
-        # 2. Create indices
-        debug_print("Step 2: Creating indices...")
-        index_manager = IndexManager(self.nodes)
-        self.summary_index, self.vector_index = await index_manager.get_indices()
+        if settings.is_single_mode():
+            data_loader = DataLoader(self.data_dir)
+            self.nodes = await data_loader.get_nodes()
 
-        # 3. Create tools
-        debug_print("Step 3: Creating query tools...")
-        self.query_manager = QueryEngineManager(
-            self.summary_index, self.vector_index)
-        self.tools = await self.query_manager.create_tools()
+            # 2. Create indices
+            debug_print("Step 2: Creating indices...")
+            index_manager = IndexManager(self.nodes)
+            self.summary_index, self.vector_index = await index_manager.get_indices()
 
-        debug_print("Initialization complete!")
+            # 3. Create tools
+            debug_print("Step 3: Creating query tools...")
+            self.query_manager = QueryEngineManager(
+                self.summary_index, self.vector_index)
+            self.tools = await self.query_manager.create_tools()
 
+            debug_print("Initialization complete!")
+        else:
+            files = [f for f in Path(self.data_dir).iterdir() if f.is_file()]
+            for file_path in files:
+                filename = Path(file_path).stem
+                
+                data_loader = DataLoader(file_path=file_path)
+                self.nodes = await data_loader.get_nodes()
+                
+                # 2. Create indices
+                debug_print("Step 2: Creating indices...")
+                index_manager = IndexManager(self.nodes)
+                self.summary_index, self.vector_index = await index_manager.get_indices()
+                
+                # 3. Create tools
+                debug_print("Step 3: Creating query tools...")
+                self.query_manager = QueryEngineManager(
+                    self.summary_index, self.vector_index)
+                summary_tool, vector_tool = await self.query_manager.create_tools(filename=filename)
+
+                list_tools = list(self.tools)
+                list_tools.append(summary_tool)
+                list_tools.append(vector_tool)
+                
+                self.tools = tuple(list_tools)
+            
         return self
 
     async def setup_router(self):
@@ -78,12 +105,8 @@ class RAGOrchestrator:
         """
         debug_section("Setting up Agent Mode")
 
-        # Get tools as list
-        summary_tool, vector_tool = self.tools
-        tools = [summary_tool, vector_tool]
-
         # Create agent manager
-        self.agent_manager = AgentManager(tools)
+        self.agent_manager = AgentManager(list(self.tools))
         await self.agent_manager.create_agent()
 
         return self.agent_manager

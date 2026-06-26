@@ -34,9 +34,11 @@ async def main():
         print("=" * 50)
 
         questions = [
-            "Tell me about your latest work experience",
-            "What technical skills do you have?",
-            "Summarize the professional profile",
+            # "Tell me about your latest work experience",
+            # "What technical skills do you have?",
+            # "Summarize the professional profile",
+            # "Which is my most used program language?",
+            "Based on the attached resume and WakaTime documents, what is the main programming language used by the user?",
         ]
 
         for i, question in enumerate(questions):
@@ -52,18 +54,20 @@ async def main():
         print("CHAT EXAMPLE - Continuing conversation")
         print("=" * 50)
 
-        follow_up = "Can you provide more details about the latest experience?"
-        print(f"\nFollow-up: {follow_up}")
-        print("-" * 40)
-        response = await orchestrator.chat(follow_up)
-        print(f"Response: {response}")
+        # follow_up = "Can you provide more details about the latest experience?"
+        # print(f"\nFollow-up: {follow_up}")
+        # print("-" * 40)
+        # response = await orchestrator.chat(follow_up)
+        # print(f"Response: {response}")
 
     else:
         print("\n" + "=" * 50)
         print("ROUTER MODE - Direct queries")
         print("=" * 50)
 
-        question = "Tell me about your latest work experience"
+        # question = "Tell me about your latest work experience"
+        # question = "Which is my most used program language?"
+        question = "Based on the attached resume and WakaTime documents, what is the main programming language used by the user?"
         print(f"\nQuestion: {question}")
         print("-" * 40)
         response = await orchestrator.query(question)
@@ -73,16 +77,16 @@ async def main():
         print("Additional Router Queries")
         print("=" * 50)
 
-        more_questions = [
-            "What are my technical skills?",
-            "Summarize my professional profile",
-        ]
+        # more_questions = [
+        #     "What are my technical skills?",
+        #     "Summarize my professional profile",
+        # ]
 
-        for q in more_questions:
-            print(f"\nQuestion: {q}")
-            print("-" * 40)
-            response = await orchestrator.query(q)
-            print(f"Response: {response}")
+        # for q in more_questions:
+        #     print(f"\nQuestion: {q}")
+        #     print("-" * 40)
+        #     response = await orchestrator.query(q)
+        #     print(f"Response: {response}")
 
 
 if __name__ == "__main__":

@@ -13,20 +13,23 @@ class SettingsConfig:
     # Debug
     DEBUG = os.environ.get('DEBUG', 'False').lower() == 'true'
 
+    # Mode: 'single' or 'multi'
+    MODE = os.environ.get('MODE', 'single')
+
     # Execution Mode: 'router' or 'agent'
     EXECUTION_MODE = os.environ.get(
         'EXECUTION_MODE', 'router')  # router | agent
 
     # Models
-    LLM_MODEL = "meta/llama-3.1-70b-instruct"
-    EMBED_MODEL = "nvidia/nv-embed-v1"
+    LLM_MODEL = os.environ.get("LLM_MODEL", "meta/llama-3.1-70b-instruct")
+    EMBED_MODEL = os.environ.get("EMBED_MODEL", "nvidia/nv-embed-v1")
 
     # Chunking configuration
-    CHUNK_SIZE = 1024
-    CHUNK_OVERLAP = 20
+    CHUNK_SIZE = int(os.environ.get('CHUNK_SIZE', '1024'))
+    CHUNK_OVERLAP = int(os.environ.get('CHUNK_OVERLAP', '20'))
 
     # Query configuration
-    SIMILARITY_TOP_K = 5
+    SIMILARITY_TOP_K = int(os.environ.get('SIMILARITY_TOP_K', '5'))
 
     # Agent configuration
     AGENT_VERBOSE = os.environ.get('AGENT_VERBOSE', 'True').lower() == 'true'
@@ -45,6 +48,14 @@ class SettingsConfig:
 
         return True
 
+    @classmethod
+    def is_single_mode(cls):
+        return cls.MODE == 'single'
+    
+    @classmethod
+    def is_multi_mode(cls):
+        return cls.MODE == 'multi'
+    
     @classmethod
     def is_agent_mode(cls):
         return cls.EXECUTION_MODE == 'agent'
